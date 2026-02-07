@@ -10,7 +10,7 @@
 
 ### Method
 
-- This paper first extracts angular velocity data from the eight passive propellers via image processing algorithms to construct a sliding window sequence embedding spatiotemporal features. Subsequently, leveraging the feature extraction capabilities of ResNet, a non-linear mapping is established from the multi-dimensional rotational speed space to the robot's forward velocity. Finally, to mitigate the limitations of single-sensor modalities and enhance estimation frequency, a multi-rate Kalman filter \cite{28} is employed to fuse the low-frequency velocity observations provided by FluidTac with high-frequency inertial data derived from an IMU using Madgwick filtering.
+- This paper first extracts angular velocity data from the eight passive propellers via image processing algorithms to construct a sliding window sequence embedding spatiotemporal features. Subsequently, leveraging the feature extraction capabilities of ResNet, a non-linear mapping is established from the multi-dimensional rotational speed space to the robot's forward velocity. Finally, to mitigate the limitations of single-sensor modalities and enhance estimation frequency, a multi-rate Kalman filter is employed to fuse the low-frequency velocity observations provided by FluidTac with high-frequency inertial data derived from an IMU using Madgwick filtering.
 
 <img width="1782" height="657" alt="0627556e661adf7889cace5990ae4e4c" src="https://github.com/user-attachments/assets/fc47f572-66a8-40cb-b882-7a969aa8630b" />
 
