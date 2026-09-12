@@ -9,7 +9,6 @@
 </p>
 
 **Zhipeng Fei\*, Yicheng Lin\*, Hengpeng Xie, Cong Li, and Bin Han**  
-\* Equal contribution
 
 Published in **IEEE Robotics and Automation Letters (RA-L), 2026**.
 
