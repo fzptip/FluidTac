@@ -1,22 +1,108 @@
-# FluidTac: A Vision-Based Arrayed Artificial Lateral Line Sensor for Underwater Ego-Motion Estimation
+# FluidTac
 
-### Video:
+## A Vision-Based Arrayed Artificial Lateral Line Sensor for Underwater Ego-Motion Estimation
 
-### Design of FluidTac
+<p align="center">
+  <a href="https://doi.org/10.1109/LRA.2026.3732929"><img src="https://img.shields.io/badge/Paper-IEEE%20RA--L-00629B" alt="IEEE RA-L Paper"></a>
+  <a href="https://doi.org/10.1109/LRA.2026.3732929"><img src="https://img.shields.io/badge/DOI-10.1109%2FLRA.2026.3732929-blue" alt="DOI"></a>
+  <img src="https://img.shields.io/badge/Year-2026-green" alt="Year 2026">
+</p>
 
-- FluidTac transforms water flow disturbances into high-dimensional, dynamic features via a circularly arranged set of passive propellers. The system utilizes an internal camera to extract passive propeller rotation features and employs a neural network to establish a nonlinear mapping between hydrodynamic responses and the body's forward velocity.
+**Zhipeng Fei\*, Yicheng Lin\*, Hengpeng Xie, Cong Li, and Bin Han**  
+\* Equal contribution
 
-<img width="1195" height="753" alt="3b960f6f767c3038733f1b6f55b8cc3a" src="https://github.com/user-attachments/assets/d64411b4-6f23-4e84-b116-87b97e5093b0" />
+Published in **IEEE Robotics and Automation Letters (RA-L), 2026**.
 
-### Method
+[[Paper]](https://doi.org/10.1109/LRA.2026.3732929) [[Fabrication Guide]](./FluidTac%20Quick%20Start%20Guide.pdf) [[Code]](./Code) [[Model]](./Model)
 
-- This paper first extracts angular velocity data from the eight passive propellers via image processing algorithms to construct a sliding window sequence embedding spatiotemporal features. Subsequently, leveraging the feature extraction capabilities of ResNet, a non-linear mapping is established from the multi-dimensional rotational speed space to the robot's forward velocity. Finally, to mitigate the limitations of single-sensor modalities and enhance estimation frequency, a multi-rate Kalman filter is employed to fuse the low-frequency velocity observations provided by FluidTac with high-frequency inertial data derived from an IMU using Madgwick filtering.
+## Overview
 
-<img width="1782" height="657" alt="0627556e661adf7889cace5990ae4e4c" src="https://github.com/user-attachments/assets/fc47f572-66a8-40cb-b882-7a969aa8630b" />
+Reliable ego-motion estimation is essential for autonomous underwater vehicles (AUVs), but conventional sensing methods can degrade in shallow, turbid, and unstructured environments. Doppler velocity logs may lose bottom lock, while vision-based approaches depend on sufficient visibility and image features.
 
-### Experiments
+**FluidTac** is a compact, vision-based arrayed artificial lateral line sensor designed to provide robust velocity observations without relying on acoustic bottom tracking or external visual features. Inspired by the lateral line system of fish, FluidTac uses an array of passive propellers to convert local water-flow disturbances into visually observable rotations. A built-in camera tracks the rotational motion of the propellers, and the resulting signals are combined with inertial measurements for underwater ego-motion estimation.
 
-- First, flow sensing experiments were conducted in a controlled water tank environment. By quantitatively analyzing the response of FluidTac to varying incident flow directions and velocities, we validated the physical basis for its flow field feature fitting. Subsequently, an indoor testing platform was established utilizing a high-precision motion capture system to assess the performance of the sensor and the estimation method across two distinct trajectories. Finally, FluidTac was integrated into an AUV for field navigation experiments in an unstructured real-world lake environment, validating the system's engineering robustness and localization accuracy under actual flow conditions.
+## Method
 
-<img width="1409" height="1027" alt="756060dbc3b08d354d71c83547de41ab" src="https://github.com/user-attachments/assets/9c18a3e9-6c3e-4845-be43-adfed7951e35" />
+![Overview of the FluidTac ego-motion estimation framework](./assets/method_overview.png)
 
+The proposed framework consists of four main stages:
+
+1. **Visual signal extraction.** A camera captures the passive propeller array at 50 Hz. Image processing and marker tracking recover the angular velocity of each propeller.
+2. **Velocity regression.** A sliding window containing the angular velocities of the eight sensing units is processed by a lightweight 1D ResNet to estimate the vehicle's forward velocity.
+3. **IMU attitude estimation.** Raw 200 Hz accelerometer and gyroscope measurements are processed using a Madgwick filter to estimate attitude and gravity-compensated forward acceleration.
+4. **Multi-rate sensor fusion.** A Kalman filter propagates the state using high-frequency inertial measurements and corrects the velocity whenever a new FluidTac observation becomes available. The fused velocity and yaw rate are then used for planar dead reckoning.
+
+## Sensor Design
+
+FluidTac employs eight passive propeller units arranged in an omnidirectional circular array. Water flow drives the propellers, while red asymmetric markers rigidly connected to their shafts provide visually trackable angular information. A single wide-angle camera observes all sensing units simultaneously, and an annular LED array provides stable internal illumination.
+
+| Parameter | Value |
+| --- | ---: |
+| Sensor dimensions | 50 × 50 × 75 mm |
+| Total mass | 76.17 g |
+| Number of propeller units | 8 |
+| Sensing diameter | 25 mm |
+| Sampling rate | 50 Hz |
+| Velocity range | 0.05-0.50 m/s |
+| Front flow-angle range | ±90° |
+| Velocity relative error | 3.49% |
+| Flow-direction error | 1.71° |
+| Signal-to-noise ratio | 5.35-10.04 dB |
+
+## Experiments
+
+FluidTac was evaluated through controlled experiments and real-world field trials:
+
+- **Flow-direction sensing:** the sensor was rotated from -90° to 90° in a controlled current.
+- **Velocity sensing:** towing experiments evaluated velocity estimation from 0.1 m/s to 0.5 m/s.
+- **Ego-motion estimation:** rectangular and circular trajectories were tested in a motion-capture-equipped water tank.
+- **Field validation:** FluidTac was integrated into an AUV and tested in a shallow, highly turbid natural lake.
+
+In the controlled ego-motion experiments, FluidTac achieved the following performance:
+
+| Metric | Result |
+| --- | ---: |
+| Velocity MAE | 7.99 mm/s |
+| Velocity relative error | 3.49% |
+| Position MAE | 5.48 cm |
+| Position RMSE | 6.57 cm |
+| Relative position error | 6.85% of traveled distance |
+
+The lake experiments further demonstrated that FluidTac can constrain inertial drift and maintain reliable trajectory estimation in visually degraded, acoustically constrained environments.
+
+## Repository Contents
+
+```text
+FluidTac/
+├── Code/                         # Source code
+├── Model/                        # FluidTac mechanical model
+├── FluidTac Quick Start Guide.pdf
+└── README.md
+```
+
+- [`Code/`](./Code): source code associated with FluidTac.
+- [`Model/`](./Model): mechanical model files for the sensor.
+- [`FluidTac Quick Start Guide.pdf`](./FluidTac%20Quick%20Start%20Guide.pdf): fabrication and assembly guide.
+
+## Citation
+
+If you find FluidTac useful in your research, please cite our paper:
+
+```bibtex
+@article{fei2026fluidtac,
+  author  = {Zhipeng Fei and Yicheng Lin and Hengpeng Xie and Cong Li and Bin Han},
+  title   = {{FluidTac}: A Vision-Based Arrayed Artificial Lateral Line Sensor for Underwater Ego-Motion Estimation},
+  journal = {IEEE Robotics and Automation Letters},
+  year    = {2026},
+  pages   = {1--8},
+  doi     = {10.1109/LRA.2026.3732929}
+}
+```
+
+## Acknowledgments
+
+This work was supported in part by the Jing-Jin-Ji Regional Integrated Environmental Improvement National Science and Technology Major Project under Grant 2025ZD1206400, the National Natural Science Foundation of China under Grant 52375015, and the Interdisciplinary Research Program (Robotics and Artificial Intelligence) of Huazhong University of Science and Technology under Grant 2024JCYJ037.
+
+## Contact
+
+For questions about FluidTac, please open an issue in this repository or contact the corresponding author, **Bin Han** ([binhan@hust.edu.cn](mailto:binhan@hust.edu.cn)).
